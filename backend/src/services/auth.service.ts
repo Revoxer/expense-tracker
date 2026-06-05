@@ -3,9 +3,10 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.utils";
 import { AuthResponse, UserDto } from "../types/auth.types";
+import { config } from "../config/env";
 
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: config.databaseUrl,
 });
 
 const prisma = new PrismaClient({ adapter });

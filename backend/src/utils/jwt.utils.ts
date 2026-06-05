@@ -1,7 +1,5 @@
 import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) throw new Error("JWT_SECRET is not set in .env");
+import { config } from "../config/env";
 
 interface JwtPayload {
   userId: string;
@@ -10,7 +8,7 @@ interface JwtPayload {
 export const generateToken = (userId: string): string => {
   const payload: JwtPayload = { userId };
 
-  const token = jwt.sign(payload, JWT_SECRET, {
+  const token = jwt.sign(payload, config.jwtSecret, {
     expiresIn: "7d",
   });
 
@@ -18,5 +16,5 @@ export const generateToken = (userId: string): string => {
 };
 
 export const verifyToken = (token: string): JwtPayload => {
-  return jwt.verify(token, JWT_SECRET) as JwtPayload;
+  return jwt.verify(token, config.jwtSecret) as JwtPayload;
 };

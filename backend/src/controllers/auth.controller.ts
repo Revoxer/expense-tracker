@@ -17,7 +17,7 @@ export const login = async (req: Request, res: Response) => {
     const data = await loginUser(email, password);
     res.status(200).json(data);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    res.status(401).json({ error: (error as Error).message });
   }
 };
 
@@ -26,6 +26,6 @@ export const me = async (req: Request, res: Response) => {
     const data = await getMe(req.user!.userId);
     res.status(200).json(data);
   } catch (error) {
-    res.status(404).json({ error: (error as Error).message });
+    res.status(401).json({ error: (error as Error).message });
   }
 };

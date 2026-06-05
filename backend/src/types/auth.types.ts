@@ -13,3 +13,9 @@ export interface AuthResponse {
     createdAt: Date;
   };
 }
+
+export interface UserDto {
+  id: string;
+  email: string;
+  createdAt: Date;
+}

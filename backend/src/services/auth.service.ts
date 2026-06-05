@@ -2,6 +2,7 @@ import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.utils";
+import { AuthResponse, UserDto } from "../types/auth.types";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -9,7 +10,10 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
-export const registerUser = async (email: string, password: string) => {
+export const registerUser = async (
+  email: string,
+  password: string,
+): Promise<UserDto> => {
   const existingUser = await prisma.user.findUnique({
     where: { email },
   });
@@ -34,7 +38,10 @@ export const registerUser = async (email: string, password: string) => {
   };
 };
 
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (
+  email: string,
+  password: string,
+): Promise<AuthResponse> => {
   const existingUser = await prisma.user.findUnique({
     where: { email },
   });
@@ -64,7 +71,7 @@ export const loginUser = async (email: string, password: string) => {
   };
 };
 
-export const getMe = async (userId: string) => {
+export const getMe = async (userId: string): Promise<UserDto> => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });

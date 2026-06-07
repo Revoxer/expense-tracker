@@ -4,6 +4,11 @@ import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.utils";
 import { AuthResponse, UserDto } from "../types/auth.types";
 import { config } from "../config/env";
+import {
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../utils/errors";
 
 const adapter = new PrismaPg({
   connectionString: config.databaseUrl,
@@ -20,7 +25,7 @@ export const registerUser = async (
   });
 
   if (existingUser) {
-    throw new Error("Email already in use");
+    throw new ConflictError("Email already in use");
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -57,7 +62,7 @@ export const loginUser = async (
   );
 
   if (!checkPassword) {
-    throw new Error("Invalid credentials");
+    throw new UnauthorizedError("Invalid credentials");
   }
 
   const token = generateToken(existingUser.id);
@@ -76,7 +81,7 @@ export const getMe = async (userId: string): Promise<UserDto> => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
-  if (!user) throw new Error("User not found");
+  if (!user) throw new NotFoundError("User not found");
   return {
     id: user.id,
     email: user.email,

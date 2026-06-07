@@ -53,7 +53,7 @@ export const loginUser = async (
   });
 
   if (!existingUser) {
-    throw new Error("Invalid credentials");
+    throw new UnauthorizedError("Invalid credentials");
   }
 
   const checkPassword: boolean = await bcrypt.compare(

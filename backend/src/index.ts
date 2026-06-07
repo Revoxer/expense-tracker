@@ -2,6 +2,7 @@ import "dotenv/config";
 import express, { Request, Response, Application } from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes";
+import { errorHandler } from "./middleware/error.middleware";
 
 const app: Application = express();
 
@@ -13,5 +14,7 @@ app.use("/api/v1/auth", authRoutes);
 app.get("/api/v1/test", (_req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
+
+app.use(errorHandler);
 
 export default app;

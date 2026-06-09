@@ -3,7 +3,7 @@ import {
   TransactionResponse,
 } from "../types/transaction.types";
 import { categorizeTransaction } from "./ai.service";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient, Prisma } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "../config/env";
 
@@ -23,10 +23,14 @@ export const createTransaction = async (
   if (!categoryId) {
     const categoryName = await categorizeTransaction(data.description);
 
-    const category = await prisma.category.findFirst({
-      where: { name: categoryName },
-    });
-    categoryId = category?.id ?? "other-fallback-id";
+    const category =
+      (await prisma.category.findFirst({
+        where: { name: categoryName },
+      })) ??
+      (await prisma.category.findFirst({
+        where: { name: "Other" },
+      }));
+    categoryId = category!.id;
     aiSuggested = true;
   }
 
@@ -51,7 +55,7 @@ export const findAllTransactions = async (
   userId: string,
   filters: { month?: number; year?: number; categoryId?: string },
 ): Promise<TransactionResponse[]> => {
-  const where: any = { userId };
+  const where: Prisma.TransactionWhereInput = { userId };
 
   if (filters.month && filters.year) {
     const startDate = new Date(filters.year, filters.month - 1, 1);

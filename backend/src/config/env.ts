@@ -12,4 +12,9 @@ export const config = {
       throw new Error("DATABASE_URL is not set");
     })(),
   port: Number(process.env.PORT) || 3000,
+  anthropicApiKey:
+    process.env.ANTHROPIC_API_KEY ??
+    (() => {
+      throw new Error("ANTHROPIC_API_KEY is not set");
+    })(),
 };

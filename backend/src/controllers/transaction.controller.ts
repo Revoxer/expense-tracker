@@ -5,6 +5,7 @@ import {
   findTransactionById,
   updateTransaction,
   deleteTransaction,
+  getTransactionStats,
 } from "../services/transaction.service";
 
 export const create = async (
@@ -81,6 +82,25 @@ export const remove = async (
     const id = req.params.id as string;
     const userId = req.user!.userId;
     const result = await deleteTransaction(userId, id);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const stats = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { month, year } = req.query;
+    const userId = req.user!.userId;
+    const result = await getTransactionStats(
+      userId,
+      Number(month),
+      Number(year),
+    );
     res.status(200).json(result);
   } catch (error) {
     next(error);

@@ -2,6 +2,7 @@ import {
   CreateTransactionDto,
   TransactionResponse,
   UpdateTransactionDto,
+  TransactionStats,
 } from "../types/transaction.types";
 import { categorizeTransaction } from "./ai.service";
 import { PrismaClient, Prisma } from "../generated/prisma/client";
@@ -141,4 +142,43 @@ export const deleteTransaction = async (
   });
 
   return { message: "Transaction deleted successfully" };
+};
+
+export const getTransactionStats = async (
+  userId: string,
+  month: number,
+  year: number,
+): Promise<TransactionStats> => {
+  const transactions = await findAllTransactions(userId, { month, year });
+
+  const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
+
+  const grouped = transactions.reduce(
+    (acc, t) => {
+      acc[t.categoryId] = (acc[t.categoryId] || 0) + t.amount;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  const topExpenses = [...transactions]
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 5);
+
+  const categories = await prisma.category.findMany({
+    where: { id: { in: Object.keys(grouped) } },
+  });
+
+  const byCategory = categories.map((cat) => ({
+    categoryName: cat.name,
+    total: grouped[cat.id] || 0,
+    percentage:
+      totalAmount > 0 ? Math.round((grouped[cat.id] / totalAmount) * 100) : 0,
+  }));
+
+  return {
+    totalAmount,
+    byCategory,
+    topExpenses,
+  };
 };

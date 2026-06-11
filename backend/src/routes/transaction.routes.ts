@@ -29,9 +29,9 @@ const router = Router();
 
 router.post("/", authMiddleware, validate(createTransactionSchema), create);
 router.get("/", authMiddleware, findAll);
+router.get("/stats", authMiddleware, stats);
 router.get("/:id", authMiddleware, findById);
 router.patch("/:id", authMiddleware, validate(updateTransactionSchema), update);
 router.delete("/:id", authMiddleware, remove);
-router.get("/stats", authMiddleware, stats);
 
 export default router;

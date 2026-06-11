@@ -91,15 +91,11 @@ export const findTransactionById = async (
   transactionId: string,
 ): Promise<TransactionResponse> => {
   const transaction = await prisma.transaction.findUnique({
-    where: { id: transactionId },
+    where: { id: transactionId, userId },
   });
 
   if (!transaction) {
     throw new NotFoundError("Transaction not found");
-  }
-
-  if (transaction.userId !== userId) {
-    throw new UnauthorizedError("Access denied");
   }
 
   return {
@@ -115,14 +111,20 @@ export const updateTransaction = async (
 ): Promise<TransactionResponse> => {
   await findTransactionById(userId, transactionId);
 
+  const { amount, description, date, categoryId } = data;
+
+  const updateData: Prisma.TransactionUpdateInput = {
+    amount,
+    description,
+    date: date ? new Date(date) : undefined,
+    ...(categoryId && {
+      category: { connect: { id: categoryId } },
+    }),
+  };
+
   const updated = await prisma.transaction.update({
     where: { id: transactionId },
-    data: {
-      ...(data.amount && { amount: data.amount }),
-      ...(data.description && { description: data.description }),
-      ...(data.date && { date: new Date(data.date) }),
-      ...(data.categoryId && { categoryId: data.categoryId }),
-    },
+    data: updateData,
   });
 
   return {

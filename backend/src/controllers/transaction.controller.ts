@@ -7,6 +7,7 @@ import {
   deleteTransaction,
   getTransactionStats,
 } from "../services/transaction.service";
+import { ValidationError } from "../utils/errors";
 
 export const create = async (
   req: Request,
@@ -94,7 +95,14 @@ export const stats = async (
   next: NextFunction,
 ) => {
   try {
-    const { month, year } = req.query;
+    const month = Number(req.query.month);
+    const year = Number(req.query.year);
+
+    if (isNaN(month) || isNaN(year)) {
+      throw new ValidationError(
+        "month and year query params are required and must be numbers",
+      );
+    }
     const userId = req.user!.userId;
     const result = await getTransactionStats(
       userId,

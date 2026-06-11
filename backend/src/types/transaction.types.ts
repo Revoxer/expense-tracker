@@ -22,3 +22,9 @@ export interface TransactionResponse {
   createdAt: Date;
   userId: string;
 }
+
+export interface TransactionStats {
+  totalAmount: number;
+  byCategory: { categoryName: string; total: number; percentage: number }[];
+  topExpenses: TransactionResponse[];
+}

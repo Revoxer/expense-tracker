@@ -2,6 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import {
   createTransaction,
   findAllTransactions,
+  findTransactionById,
+  updateTransaction,
+  deleteTransaction,
+  getTransactionStats,
 } from "../services/transaction.service";
 
 export const create = async (
@@ -33,6 +37,70 @@ export const findAll = async (
       categoryId: typeof categoryId === "string" ? categoryId : undefined,
     };
     const result = await findAllTransactions(userId, filters);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const findById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const userId = req.user!.userId;
+    const result = await findTransactionById(userId, id);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const update = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const userId = req.user!.userId;
+    const result = await updateTransaction(userId, id, req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const remove = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const userId = req.user!.userId;
+    const result = await deleteTransaction(userId, id);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const stats = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { month, year } = req.query;
+    const userId = req.user!.userId;
+    const result = await getTransactionStats(
+      userId,
+      Number(month),
+      Number(year),
+    );
     res.status(200).json(result);
   } catch (error) {
     next(error);

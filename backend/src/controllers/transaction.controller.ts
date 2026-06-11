@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import {
   createTransaction,
   findAllTransactions,
+  findTransactionById,
 } from "../services/transaction.service";
 
 export const create = async (
@@ -33,6 +34,21 @@ export const findAll = async (
       categoryId: typeof categoryId === "string" ? categoryId : undefined,
     };
     const result = await findAllTransactions(userId, filters);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const findById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const userId = req.user!.userId;
+    const result = await findTransactionById(userId, id);
     res.status(200).json(result);
   } catch (error) {
     next(error);

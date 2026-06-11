@@ -6,6 +6,7 @@ import { categorizeTransaction } from "./ai.service";
 import { PrismaClient, Prisma } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "../config/env";
+import { NotFoundError, UnauthorizedError } from "../utils/errors";
 
 const adapter = new PrismaPg({
   connectionString: config.databaseUrl,
@@ -30,7 +31,12 @@ export const createTransaction = async (
       (await prisma.category.findFirst({
         where: { name: "Other" },
       }));
-    categoryId = category!.id;
+    if (!category) {
+      throw new NotFoundError(
+        "No categories found in database. Run seed first.",
+      );
+    }
+    categoryId = category.id;
     aiSuggested = true;
   }
 
@@ -76,4 +82,26 @@ export const findAllTransactions = async (
     ...t,
     amount: Number(t.amount),
   }));
+};
+
+export const findTransactionById = async (
+  userId: string,
+  transactionId: string,
+): Promise<TransactionResponse> => {
+  const transaction = await prisma.transaction.findUnique({
+    where: { id: transactionId },
+  });
+
+  if (!transaction) {
+    throw new NotFoundError("Transaction not found");
+  }
+
+  if (transaction.userId !== userId) {
+    throw new UnauthorizedError("Access denied");
+  }
+
+  return {
+    ...transaction,
+    amount: Number(transaction.amount),
+  };
 };

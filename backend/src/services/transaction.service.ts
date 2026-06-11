@@ -1,6 +1,7 @@
 import {
   CreateTransactionDto,
   TransactionResponse,
+  UpdateTransactionDto,
 } from "../types/transaction.types";
 import { categorizeTransaction } from "./ai.service";
 import { PrismaClient, Prisma } from "../generated/prisma/client";
@@ -103,5 +104,28 @@ export const findTransactionById = async (
   return {
     ...transaction,
     amount: Number(transaction.amount),
+  };
+};
+
+export const updateTransaction = async (
+  userId: string,
+  transactionId: string,
+  data: UpdateTransactionDto,
+): Promise<TransactionResponse> => {
+  await findTransactionById(userId, transactionId);
+
+  const updated = await prisma.transaction.update({
+    where: { id: transactionId },
+    data: {
+      ...(data.amount && { amount: data.amount }),
+      ...(data.description && { description: data.description }),
+      ...(data.date && { date: new Date(data.date) }),
+      ...(data.categoryId && { categoryId: data.categoryId }),
+    },
+  });
+
+  return {
+    ...updated,
+    amount: Number(updated.amount),
   };
 };

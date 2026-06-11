@@ -3,6 +3,7 @@ import {
   create,
   findAll,
   findById,
+  update,
 } from "../controllers/transaction.controller";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
@@ -15,10 +16,18 @@ const createTransactionSchema = z.object({
   categoryId: z.string().optional(),
 });
 
+const updateTransactionSchema = z.object({
+  amount: z.number().positive().optional(),
+  description: z.string().min(1).optional(),
+  date: z.string().optional(),
+  categoryId: z.string().optional(),
+});
+
 const router = Router();
 
 router.post("/", authMiddleware, validate(createTransactionSchema), create);
 router.get("/", authMiddleware, findAll);
 router.get("/:id", authMiddleware, findById);
+router.patch("/:id", authMiddleware, validate(updateTransactionSchema), update);
 
 export default router;

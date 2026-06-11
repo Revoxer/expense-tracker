@@ -129,3 +129,16 @@ export const updateTransaction = async (
     amount: Number(updated.amount),
   };
 };
+
+export const deleteTransaction = async (
+  userId: string,
+  transactionId: string,
+): Promise<{ message: string }> => {
+  await findTransactionById(userId, transactionId);
+
+  await prisma.transaction.delete({
+    where: { id: transactionId },
+  });
+
+  return { message: "Transaction deleted successfully" };
+};

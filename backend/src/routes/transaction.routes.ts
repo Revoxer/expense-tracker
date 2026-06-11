@@ -4,6 +4,7 @@ import {
   findAll,
   findById,
   update,
+  remove,
 } from "../controllers/transaction.controller";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
@@ -29,5 +30,6 @@ router.post("/", authMiddleware, validate(createTransactionSchema), create);
 router.get("/", authMiddleware, findAll);
 router.get("/:id", authMiddleware, findById);
 router.patch("/:id", authMiddleware, validate(updateTransactionSchema), update);
+router.delete("/:id", authMiddleware, remove);
 
 export default router;

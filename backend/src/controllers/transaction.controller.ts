@@ -4,6 +4,7 @@ import {
   findAllTransactions,
   findTransactionById,
   updateTransaction,
+  deleteTransaction,
 } from "../services/transaction.service";
 
 export const create = async (
@@ -65,6 +66,21 @@ export const update = async (
     const id = req.params.id as string;
     const userId = req.user!.userId;
     const result = await updateTransaction(userId, id, req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const remove = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const userId = req.user!.userId;
+    const result = await deleteTransaction(userId, id);
     res.status(200).json(result);
   } catch (error) {
     next(error);

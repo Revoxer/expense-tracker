@@ -1,6 +1,7 @@
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "../config/env";
+import { NotFoundError } from "../utils/errors";
 
 const adapter = new PrismaPg({
   connectionString: config.databaseUrl,
@@ -14,4 +15,16 @@ export const findAllCategories = async () => {
   });
 
   return categories;
+};
+
+export const findCategoryById = async (categoryId: string) => {
+  const category = await prisma.category.findUnique({
+    where: { id: categoryId },
+  });
+
+  if (!category) {
+    throw new NotFoundError("Category not found");
+  }
+
+  return category;
 };

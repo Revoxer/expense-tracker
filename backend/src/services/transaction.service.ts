@@ -8,7 +8,7 @@ import { categorizeTransaction } from "./ai.service";
 import { PrismaClient, Prisma } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "../config/env";
-import { NotFoundError, UnauthorizedError } from "../utils/errors";
+import { NotFoundError } from "../utils/errors";
 
 const adapter = new PrismaPg({
   connectionString: config.databaseUrl,

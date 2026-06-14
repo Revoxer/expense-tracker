@@ -5,16 +5,9 @@ import {
   TransactionStats,
 } from "../types/transaction.types";
 import { categorizeTransaction } from "./ai.service";
-import { PrismaClient, Prisma } from "../generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { config } from "../config/env";
+import { Prisma } from "../generated/prisma/client";
+import { prisma } from "../db/prisma";
 import { NotFoundError } from "../utils/errors";
-
-const adapter = new PrismaPg({
-  connectionString: config.databaseUrl,
-});
-
-const prisma = new PrismaClient({ adapter });
 
 export const createTransaction = async (
   userId: string,
@@ -90,7 +83,7 @@ export const findTransactionById = async (
   userId: string,
   transactionId: string,
 ): Promise<TransactionResponse> => {
-  const transaction = await prisma.transaction.findUnique({
+  const transaction = await prisma.transaction.findFirst({
     where: { id: transactionId, userId },
   });
 

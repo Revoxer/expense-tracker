@@ -17,4 +17,9 @@ export const config = {
     (() => {
       throw new Error("ANTHROPIC_API_KEY is not set");
     })(),
+  testDatabaseUrl:
+    process.env.TEST_DATABASE_URL ??
+    (() => {
+      throw new Error("TEST_DATABASE_URL is not set");
+    })(),
 };

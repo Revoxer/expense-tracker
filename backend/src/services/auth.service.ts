@@ -30,12 +30,16 @@ export const registerUser = async (
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const user = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-    },
-  });
+  const user = await prisma.user
+    .create({
+      data: { email, passwordHash },
+    })
+    .catch((error) => {
+      if (error.code === "P2002") {
+        throw new ConflictError("Email already in use");
+      }
+      throw error;
+    });
 
   return {
     id: user.id,
@@ -81,7 +85,9 @@ export const getMe = async (userId: string): Promise<UserDto> => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
+
   if (!user) throw new NotFoundError("User not found");
+
   return {
     id: user.id,
     email: user.email,

@@ -1,0 +1,25 @@
+import "dotenv/config";
+
+export const config = {
+  jwtSecret:
+    process.env.JWT_SECRET ??
+    (() => {
+      throw new Error("JWT_SECRET is not set");
+    })(),
+  databaseUrl:
+    process.env.DATABASE_URL ??
+    (() => {
+      throw new Error("DATABASE_URL is not set");
+    })(),
+  port: Number(process.env.PORT) || 3000,
+  anthropicApiKey:
+    process.env.ANTHROPIC_API_KEY ??
+    (() => {
+      throw new Error("ANTHROPIC_API_KEY is not set");
+    })(),
+  testDatabaseUrl:
+    process.env.TEST_DATABASE_URL ??
+    (() => {
+      throw new Error("TEST_DATABASE_URL is not set");
+    })(),
+};

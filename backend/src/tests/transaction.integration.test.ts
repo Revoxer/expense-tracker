@@ -15,7 +15,10 @@ const registerAndLogin = async () => {
   return response.body.token as string;
 };
 
-const createTransaction = async (token: string) => {
+const createTransaction = async (token: string, overrides = {}) => {
+  const categories = await prisma.category.findMany({ take: 1 });
+  const categoryId = categories[0].id;
+
   const response = await request(app)
     .post("/api/v1/transactions")
     .set("Authorization", `Bearer ${token}`)
@@ -23,6 +26,8 @@ const createTransaction = async (token: string) => {
       amount: 25.5,
       description: "McDonald's",
       date: "2024-01-15",
+      categoryId,
+      ...overrides,
     });
 
   return response.body;
@@ -37,7 +42,7 @@ describe("POST /api/v1/transactions", () => {
     await prisma.$disconnect();
   });
 
-  test("should create a transaction and return 201", async () => {
+  test("should create a transaction with AI categorization", async () => {
     const token = await registerAndLogin();
 
     const response = await request(app)
@@ -53,7 +58,15 @@ describe("POST /api/v1/transactions", () => {
     expect(response.body.amount).toBe(25.5);
     expect(response.body.description).toBe("McDonald's");
     expect(response.body.aiSuggested).toBe(true);
-  }, 10000);
+  }, 15000);
+
+  test("should create a transaction with provided categoryId", async () => {
+    const token = await registerAndLogin();
+    const transaction = await createTransaction(token);
+
+    expect(transaction.aiSuggested).toBe(false);
+    expect(transaction.categoryId).toBeDefined();
+  });
 
   test("should return 401 without token", async () => {
     const response = await request(app).post("/api/v1/transactions").send({
@@ -207,59 +220,59 @@ describe("DELETE /api/v1/transactions/:id", () => {
 
     expect(response.status).toBe(404);
   });
+});
 
-  describe("GET /api/v1/transactions/stats", () => {
-    beforeEach(async () => {
-      await cleanDatabase();
-    });
+describe("GET /api/v1/transactions/stats", () => {
+  beforeEach(async () => {
+    await cleanDatabase();
+  });
 
-    afterAll(async () => {
-      await prisma.$disconnect();
-    });
+  afterAll(async () => {
+    await prisma.$disconnect();
+  });
 
-    test("should return 200 with stats", async () => {
-      const token = await registerAndLogin();
-      await createTransaction(token);
+  test("should return 200 with stats", async () => {
+    const token = await registerAndLogin();
+    await createTransaction(token);
 
-      const response = await request(app)
-        .get("/api/v1/transactions/stats?month=1&year=2024")
-        .set("Authorization", `Bearer ${token}`);
+    const response = await request(app)
+      .get("/api/v1/transactions/stats?month=1&year=2024")
+      .set("Authorization", `Bearer ${token}`);
 
-      expect(response.status).toBe(200);
-      expect(response.body.totalAmount).toBeDefined();
-      expect(Array.isArray(response.body.byCategory)).toBe(true);
-      expect(Array.isArray(response.body.topExpenses)).toBe(true);
-    });
+    expect(response.status).toBe(200);
+    expect(response.body.totalAmount).toBeDefined();
+    expect(Array.isArray(response.body.byCategory)).toBe(true);
+    expect(Array.isArray(response.body.topExpenses)).toBe(true);
+  });
 
-    test("should return 400 when month or year is missing", async () => {
-      const token = await registerAndLogin();
+  test("should return 400 when month or year is missing", async () => {
+    const token = await registerAndLogin();
 
-      const response = await request(app)
-        .get("/api/v1/transactions/stats")
-        .set("Authorization", `Bearer ${token}`);
+    const response = await request(app)
+      .get("/api/v1/transactions/stats")
+      .set("Authorization", `Bearer ${token}`);
 
-      expect(response.status).toBe(400);
-    });
+    expect(response.status).toBe(400);
+  });
 
-    test("should return 401 without token", async () => {
-      const response = await request(app).get(
-        "/api/v1/transactions/stats?month=1&year=2024",
-      );
+  test("should return 401 without token", async () => {
+    const response = await request(app).get(
+      "/api/v1/transactions/stats?month=1&year=2024",
+    );
 
-      expect(response.status).toBe(401);
-    });
+    expect(response.status).toBe(401);
+  });
 
-    test("should return empty stats when no transactions", async () => {
-      const token = await registerAndLogin();
+  test("should return empty stats when no transactions", async () => {
+    const token = await registerAndLogin();
 
-      const response = await request(app)
-        .get("/api/v1/transactions/stats?month=1&year=2024")
-        .set("Authorization", `Bearer ${token}`);
+    const response = await request(app)
+      .get("/api/v1/transactions/stats?month=1&year=2024")
+      .set("Authorization", `Bearer ${token}`);
 
-      expect(response.status).toBe(200);
-      expect(response.body.totalAmount).toBe(0);
-      expect(response.body.byCategory).toHaveLength(0);
-      expect(response.body.topExpenses).toHaveLength(0);
-    });
+    expect(response.status).toBe(200);
+    expect(response.body.totalAmount).toBe(0);
+    expect(response.body.byCategory).toHaveLength(0);
+    expect(response.body.topExpenses).toHaveLength(0);
   });
 });

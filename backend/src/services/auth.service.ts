@@ -1,20 +1,12 @@
-import { PrismaClient } from "../generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { prisma } from "../db/prisma";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.utils";
 import { AuthResponse, UserDto } from "../types/auth.types";
-import { config } from "../config/env";
 import {
   ConflictError,
   NotFoundError,
   UnauthorizedError,
 } from "../utils/errors";
-
-const adapter = new PrismaPg({
-  connectionString: config.databaseUrl,
-});
-
-const prisma = new PrismaClient({ adapter });
 
 export const registerUser = async (
   email: string,

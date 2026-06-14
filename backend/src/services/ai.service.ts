@@ -10,7 +10,7 @@ export const categorizeTransaction = async (
 
   try {
     const message = await client.messages.create({
-      model: "claude-opus-4-5",
+      model: "claude-opus-4-6",
       max_tokens: 10,
       messages: [{ role: "user", content: prompt }],
     });

@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { DashboardPage } from "./pages/DashboardPage";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -19,7 +20,7 @@ createRoot(document.getElementById("root")!).render(
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <div>Dashboard – coming soon</div>
+                <DashboardPage />
               </ProtectedRoute>
             }
           />

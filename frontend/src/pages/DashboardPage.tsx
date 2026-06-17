@@ -3,10 +3,13 @@ import { getTransactions } from "../services/transaction.service";
 import { useAuthStore } from "../stores/auth.store";
 import { useNavigate } from "react-router-dom";
 import { AddTransactionForm } from "../components/forms/AddTransactionForm";
+import { StatsChart } from "../components/charts/StatsChart";
 
 export const DashboardPage = () => {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const navigate = useNavigate();
+
+  const now = new Date();
 
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["transactions"],
@@ -31,6 +34,7 @@ export const DashboardPage = () => {
         </div>
       ))}
       <AddTransactionForm />
+      <StatsChart month={now.getMonth() + 1} year={now.getFullYear()} />
     </div>
   );
 };

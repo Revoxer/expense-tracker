@@ -11,17 +11,22 @@ export const DashboardPage = () => {
 
   const now = new Date();
 
-  const { data: transactions, isLoading } = useQuery({
+  const {
+    data: transactions,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["transactions"],
     queryFn: () => getTransactions(),
   });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Failed to load transactions</div>;
 
   const handleLogout = () => {
     clearAuth();
     navigate("/login");
   };
-
-  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>

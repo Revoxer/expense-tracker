@@ -8,12 +8,22 @@ interface StatsChartProps {
 }
 
 export const StatsChart = ({ month, year }: StatsChartProps) => {
-  const { data: stats, isLoading } = useQuery({
+  const {
+    data: stats,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["stats", month, year],
     queryFn: () => getStats(month, year),
   });
 
   if (isLoading) return <div>Loading stats...</div>;
+  if (isError) {
+    const message =
+      error instanceof Error ? error.message : "An unknown error occurred";
+    return <div>Error loading stats: {message}</div>;
+  }
   if (!stats || stats.byCategory.length === 0)
     return <div>No data for this period</div>;
 

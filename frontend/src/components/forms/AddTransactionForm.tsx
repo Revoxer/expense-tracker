@@ -5,6 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createTransaction } from "../../services/transaction.service";
 import { getCategories } from "../../services/category.service";
+import {
+  inputClass,
+  buttonClass,
+  labelClass,
+  errorClass,
+} from "../../utils/styles";
 
 const transactionSchema = z.object({
   description: z.string().min(1, "Description is required"),
@@ -48,58 +54,42 @@ export const AddTransactionForm = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Description
-          </label>
+          <label className={labelClass}>Description</label>
           <input
             placeholder="e.g. McDonald's, Uber, Netflix"
             {...register("description")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className={inputClass}
           />
           {errors.description && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.description.message}
-            </p>
+            <p className={errorClass}>{errors.description.message}</p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Amount
-          </label>
+          <label className={labelClass}>Amount</label>
           <input
             type="number"
             step="0.01"
             placeholder="0.00"
             {...register("amount")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className={inputClass}
           />
           {errors.amount && (
-            <p className="text-red-500 text-xs mt-1">{errors.amount.message}</p>
+            <p className={errorClass}>{errors.amount.message}</p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Date
-          </label>
-          <input
-            type="date"
-            {...register("date")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-          />
-          {errors.date && (
-            <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>
-          )}
+          <label className={labelClass}>Date</label>
+          <input type="date" {...register("date")} className={inputClass} />
+          {errors.date && <p className={errorClass}>{errors.date.message}</p>}
         </div>
 
         <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Category
-          </label>
+          <label className={labelClass}>Category</label>
           <select
             {...register("categoryId")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white"
+            className={`${inputClass} bg-white`}
           >
             <option value="">✨ Let AI suggest a category</option>
             {categories?.map((cat) => (
@@ -120,7 +110,7 @@ export const AddTransactionForm = () => {
       <button
         type="submit"
         disabled={isSubmitting || mutation.isPending}
-        className="w-full bg-gray-900 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
+        className={buttonClass}
       >
         {mutation.isPending ? "Adding..." : "Add Transaction"}
       </button>

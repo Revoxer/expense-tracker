@@ -4,11 +4,11 @@ import { useAuthStore } from "../stores/auth.store";
 import { useNavigate } from "react-router-dom";
 import { AddTransactionForm } from "../components/forms/AddTransactionForm";
 import { StatsChart } from "../components/charts/StatsChart";
+import { cardClass } from "../utils/styles";
 
 export const DashboardPage = () => {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const navigate = useNavigate();
-
   const now = new Date();
 
   const {
@@ -45,21 +45,21 @@ export const DashboardPage = () => {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className={cardClass}>
           <h2 className="text-base font-semibold text-gray-900 mb-6">
             Monthly Overview
           </h2>
           <StatsChart month={now.getMonth() + 1} year={now.getFullYear()} />
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className={cardClass}>
           <h2 className="text-base font-semibold text-gray-900 mb-6">
             Add Transaction
           </h2>
           <AddTransactionForm />
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className={cardClass}>
           <h2 className="text-base font-semibold text-gray-900 mb-6">
             Recent Transactions
           </h2>

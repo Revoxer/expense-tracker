@@ -3,8 +3,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { login } from "../services/auth.service";
 import { useAuthStore } from "../stores/auth.store";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
+import {
+  inputClass,
+  buttonClass,
+  labelClass,
+  errorClass,
+} from "../utils/styles";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -15,7 +21,6 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
-
   const setAuth = useAuthStore((state) => state.setAuth);
   const navigate = useNavigate();
 
@@ -48,36 +53,28 @@ export const LoginPage = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+            <label className={labelClass}>Email</label>
             <input
               type="email"
               placeholder="you@example.com"
               {...register("email")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              className={inputClass}
             />
             {errors.email && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.email.message}
-              </p>
+              <p className={errorClass}>{errors.email.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <label className={labelClass}>Password</label>
             <input
               type="password"
               placeholder="••••••••"
               {...register("password")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              className={inputClass}
             />
             {errors.password && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.password.message}
-              </p>
+              <p className={errorClass}>{errors.password.message}</p>
             )}
           </div>
 
@@ -87,23 +84,19 @@ export const LoginPage = () => {
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-gray-900 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
-          >
+          <button type="submit" disabled={isSubmitting} className={buttonClass}>
             {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Don't have an account?{" "}
-          <a
-            href="/register"
+          <Link
+            to="/register"
             className="text-gray-900 font-medium hover:underline"
           >
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

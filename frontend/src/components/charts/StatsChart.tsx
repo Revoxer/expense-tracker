@@ -1,6 +1,7 @@
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { getStats } from "../../services/transaction.service";
+import { getChartColor } from "../../utils/chartColors";
 
 interface StatsChartProps {
   month: number;
@@ -50,7 +51,7 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
             innerRadius={60}
           >
             {stats.byCategory.map((_, index) => (
-              <Cell key={index} fill={`hsl(${index * 45}, 60%, 55%)`} />
+              <Cell key={index} fill={getChartColor(index)} />
             ))}
           </Pie>
           <Tooltip
@@ -63,7 +64,7 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
             <div key={cat.categoryName} className="flex items-center gap-3">
               <div
                 className="w-3 h-3 rounded-full shrink-0"
-                style={{ backgroundColor: `hsl(${index * 45}, 60%, 55%)` }}
+                style={{ backgroundColor: getChartColor(index) }}
               />
               <div className="flex-1 flex items-center justify-between">
                 <span className="text-sm text-gray-700">

@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { getStats } from "../../services/transaction.service";
 
@@ -29,23 +29,65 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
 
   return (
     <div>
-      <h2>Total: {stats.totalAmount}</h2>
-      <PieChart width={400} height={400}>
-        <Pie
-          data={stats.byCategory}
-          dataKey="total"
-          nameKey="categoryName"
-          cx="50%"
-          cy="50%"
-          outerRadius={150}
-        >
-          {stats.byCategory.map((_, index) => (
-            <Cell key={index} fill={`hsl(${index * 45}, 70%, 50%)`} />
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <p className="text-sm text-gray-500">Total spent</p>
+          <p className="text-3xl font-semibold text-gray-900">
+            ${stats.totalAmount.toFixed(2)}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row items-center gap-8">
+        <PieChart width={280} height={280}>
+          <Pie
+            data={stats.byCategory}
+            dataKey="total"
+            nameKey="categoryName"
+            cx="50%"
+            cy="50%"
+            outerRadius={120}
+            innerRadius={60}
+          >
+            {stats.byCategory.map((_, index) => (
+              <Cell key={index} fill={`hsl(${index * 45}, 60%, 55%)`} />
+            ))}
+          </Pie>
+          <Tooltip
+            formatter={(value) => [`$${Number(value).toFixed(2)}`, "Amount"]}
+          />
+        </PieChart>
+
+        <div className="flex-1 w-full space-y-3">
+          {stats.byCategory.map((cat, index) => (
+            <div key={cat.categoryName} className="flex items-center gap-3">
+              <div
+                className="w-3 h-3 rounded-full shrink-0"
+                style={{ backgroundColor: `hsl(${index * 45}, 60%, 55%)` }}
+              />
+              <div className="flex-1 flex items-center justify-between">
+                <span className="text-sm text-gray-700">
+                  {cat.categoryName}
+                </span>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 bg-gray-100 rounded-full h-1.5">
+                    <div
+                      className="bg-gray-900 h-1.5 rounded-full"
+                      style={{ width: `${cat.percentage}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900 w-10 text-right">
+                    {cat.percentage}%
+                  </span>
+                  <span className="text-sm text-gray-500 w-16 text-right">
+                    ${cat.total.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
           ))}
-        </Pie>
-        <Tooltip />
-        <Legend />
-      </PieChart>
+        </div>
+      </div>
     </div>
   );
 };

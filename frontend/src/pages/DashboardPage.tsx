@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getTransactions } from "../services/transaction.service";
 import { useAuthStore } from "../stores/auth.store";
 import { useNavigate } from "react-router-dom";
+import { AddTransactionForm } from "../components/forms/AddTransactionForm";
 
 export const DashboardPage = () => {
   const clearAuth = useAuthStore((state) => state.clearAuth);
@@ -29,6 +30,7 @@ export const DashboardPage = () => {
           <span>{transaction.date}</span>
         </div>
       ))}
+      <AddTransactionForm />
     </div>
   );
 };

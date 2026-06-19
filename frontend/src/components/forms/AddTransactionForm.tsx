@@ -33,6 +33,7 @@ export const AddTransactionForm = () => {
     mutationFn: createTransaction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
       reset();
     },
   });

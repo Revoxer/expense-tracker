@@ -23,6 +23,7 @@ export const DashboardPage = () => {
     mutationFn: deleteTransaction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
     },
   });
 

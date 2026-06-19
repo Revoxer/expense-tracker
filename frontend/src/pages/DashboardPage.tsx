@@ -20,8 +20,24 @@ export const DashboardPage = () => {
     queryFn: () => getTransactions(),
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Failed to load transactions</div>;
+  if (isLoading)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-sm text-gray-500">Loading...</div>
+      </div>
+    );
+
+  if (isError)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+          <p className="text-sm text-gray-900 font-medium mb-1">
+            Something went wrong
+          </p>
+          <p className="text-sm text-gray-500">Failed to load transactions</p>
+        </div>
+      </div>
+    );
 
   const handleLogout = () => {
     clearAuth();

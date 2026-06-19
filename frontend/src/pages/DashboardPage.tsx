@@ -1,5 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { getTransactions } from "../services/transaction.service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getTransactions,
+  deleteTransaction,
+} from "../services/transaction.service";
 import { useAuthStore } from "../stores/auth.store";
 import { useNavigate } from "react-router-dom";
 import { AddTransactionForm } from "../components/forms/AddTransactionForm";
@@ -10,6 +13,15 @@ export const DashboardPage = () => {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const navigate = useNavigate();
   const now = new Date();
+
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteTransaction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
 
   const {
     data: transactions,
@@ -102,9 +114,18 @@ export const DashboardPage = () => {
                     })}
                   </p>
                 </div>
-                <span className="text-sm font-semibold text-gray-900">
-                  ${transaction.amount.toFixed(2)}
-                </span>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-semibold text-gray-900">
+                    ${transaction.amount.toFixed(2)}
+                  </span>
+                  <button
+                    onClick={() => deleteMutation.mutate(transaction.id)}
+                    disabled={deleteMutation.isPending}
+                    className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

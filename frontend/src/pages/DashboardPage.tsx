@@ -3,6 +3,7 @@ import {
   getTransactions,
   deleteTransaction,
 } from "../services/transaction.service";
+import { useState } from "react";
 import { useAuthStore } from "../stores/auth.store";
 import { useNavigate } from "react-router-dom";
 import { AddTransactionForm } from "../components/forms/AddTransactionForm";
@@ -13,6 +14,8 @@ export const DashboardPage = () => {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const navigate = useNavigate();
   const now = new Date();
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYear] = useState(now.getFullYear());
 
   const queryClient = useQueryClient();
 
@@ -28,8 +31,8 @@ export const DashboardPage = () => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["transactions"],
-    queryFn: () => getTransactions(),
+    queryKey: ["transactions", month, year],
+    queryFn: () => getTransactions({ month, year }),
   });
 
   if (isLoading)
@@ -73,11 +76,45 @@ export const DashboardPage = () => {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => {
+              if (month === 1) {
+                setMonth(12);
+                setYear(year - 1);
+              } else {
+                setMonth(month - 1);
+              }
+            }}
+            className="text-sm text-gray-500 hover:text-gray-900 transition-colors px-3 py-1 rounded-lg hover:bg-gray-100"
+          >
+            ← Previous
+          </button>
+          <span className="text-sm font-medium text-gray-900">
+            {new Date(year, month - 1).toLocaleDateString("en-GB", {
+              month: "long",
+              year: "numeric",
+            })}
+          </span>
+          <button
+            onClick={() => {
+              if (month === 12) {
+                setMonth(1);
+                setYear(year + 1);
+              } else {
+                setMonth(month + 1);
+              }
+            }}
+            className="text-sm text-gray-500 hover:text-gray-900 transition-colors px-3 py-1 rounded-lg hover:bg-gray-100"
+          >
+            Next →
+          </button>
+        </div>
         <div className={cardClass}>
           <h2 className="text-base font-semibold text-gray-900 mb-6">
             Monthly Overview
           </h2>
-          <StatsChart month={now.getMonth() + 1} year={now.getFullYear()} />
+          <StatsChart month={month} year={year} />
         </div>
 
         <div className={cardClass}>

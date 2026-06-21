@@ -3,7 +3,7 @@ import type { Resolver } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { createTransaction } from "../../services/transaction.service";
+import { updateTransaction } from "../../services/transaction.service";
 import { getCategories } from "../../services/category.service";
 import {
   inputClass,
@@ -11,21 +11,26 @@ import {
   labelClass,
   errorClass,
 } from "../../utils/styles";
+import type { Transaction } from "../../types/transaction.types";
 
-const transactionSchema = z.object({
+const editSchema = z.object({
   description: z.string().min(1, "Description is required"),
   amount: z.coerce.number().positive("Amount must be positive"),
   date: z.string().min(1, "Date is required"),
   categoryId: z.string().optional(),
 });
 
-type TransactionForm = z.infer<typeof transactionSchema>;
+type EditForm = z.infer<typeof editSchema>;
 
-interface AddTransactionFormProps {
+interface EditTransactionFormProps {
+  transaction: Transaction;
   onSuccess?: () => void;
 }
 
-export const AddTransactionForm = ({ onSuccess }: AddTransactionFormProps) => {
+export const EditTransactionForm = ({
+  transaction,
+  onSuccess,
+}: EditTransactionFormProps) => {
   const queryClient = useQueryClient();
 
   const { data: categories } = useQuery({
@@ -34,14 +39,13 @@ export const AddTransactionForm = ({ onSuccess }: AddTransactionFormProps) => {
   });
 
   const mutation = useMutation({
-    mutationFn: createTransaction,
+    mutationFn: (data: EditForm) => updateTransaction(transaction.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["transactions"],
         exact: false,
       });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
-      reset();
       onSuccess?.();
     },
   });
@@ -49,13 +53,18 @@ export const AddTransactionForm = ({ onSuccess }: AddTransactionFormProps) => {
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors, isSubmitting },
-  } = useForm<TransactionForm>({
-    resolver: zodResolver(transactionSchema) as Resolver<TransactionForm>,
+  } = useForm<EditForm>({
+    resolver: zodResolver(editSchema) as Resolver<EditForm>,
+    defaultValues: {
+      description: transaction.description,
+      amount: transaction.amount,
+      date: transaction.date.split("T")[0],
+      categoryId: transaction.categoryId,
+    },
   });
 
-  const onSubmit = async (data: TransactionForm) => {
+  const onSubmit = async (data: EditForm) => {
     await mutation.mutateAsync(data);
   };
 
@@ -64,11 +73,7 @@ export const AddTransactionForm = ({ onSuccess }: AddTransactionFormProps) => {
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
           <label className={labelClass}>Description</label>
-          <input
-            placeholder="e.g. McDonald's, Uber, Netflix"
-            {...register("description")}
-            className={inputClass}
-          />
+          <input {...register("description")} className={inputClass} />
           {errors.description && (
             <p className={errorClass}>{errors.description.message}</p>
           )}
@@ -79,7 +84,6 @@ export const AddTransactionForm = ({ onSuccess }: AddTransactionFormProps) => {
           <input
             type="number"
             step="0.01"
-            placeholder="0.00"
             {...register("amount")}
             className={inputClass}
           />
@@ -100,7 +104,7 @@ export const AddTransactionForm = ({ onSuccess }: AddTransactionFormProps) => {
             {...register("categoryId")}
             className={`${inputClass} bg-white`}
           >
-            <option value="">✨ Let AI suggest a category</option>
+            <option value="">No category</option>
             {categories?.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.icon} {cat.name}
@@ -112,7 +116,7 @@ export const AddTransactionForm = ({ onSuccess }: AddTransactionFormProps) => {
 
       {mutation.isError && (
         <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-          <p className="text-red-600 text-sm">Failed to add transaction</p>
+          <p className="text-red-600 text-sm">Failed to update transaction</p>
         </div>
       )}
 
@@ -121,7 +125,7 @@ export const AddTransactionForm = ({ onSuccess }: AddTransactionFormProps) => {
         disabled={isSubmitting || mutation.isPending}
         className={buttonClass}
       >
-        {mutation.isPending ? "Adding..." : "Add Transaction"}
+        {mutation.isPending ? "Saving..." : "Save Changes"}
       </button>
     </form>
   );

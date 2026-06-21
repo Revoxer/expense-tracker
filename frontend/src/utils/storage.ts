@@ -1,6 +1,8 @@
+const isBrowser = typeof window !== "undefined";
+
 export const getToken = (): string | null => {
   try {
-    if (typeof window === "undefined") return null;
+    if (!isBrowser) return null;
     return localStorage.getItem("token");
   } catch {
     return null;
@@ -9,7 +11,7 @@ export const getToken = (): string | null => {
 
 export const setToken = (token: string): void => {
   try {
-    if (typeof window === "undefined") return;
+    if (!isBrowser) return;
     localStorage.setItem("token", token);
   } catch {
     console.error("Failed to save token to localStorage");
@@ -18,7 +20,7 @@ export const setToken = (token: string): void => {
 
 export const removeToken = (): void => {
   try {
-    if (typeof window === "undefined") return;
+    if (!isBrowser) return;
     localStorage.removeItem("token");
   } catch {
     console.error("Failed to remove token from localStorage");

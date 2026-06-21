@@ -2,7 +2,7 @@ import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { getStats } from "../../services/transaction.service";
 import { getChartColor, clampPercentage } from "../../utils/chartColors";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 interface StatsChartProps {
   month: number;
@@ -22,6 +22,23 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
     queryFn: () => getStats(month, year),
   });
 
+  const categories = useMemo(
+    () =>
+      (stats?.byCategory ?? []).map((cat, index) => ({
+        ...cat,
+        color: getChartColor(index),
+      })),
+    [stats],
+  );
+
+  const sortedCategories = useMemo(
+    () =>
+      [...categories].sort((a, b) =>
+        sortAsc ? a.total - b.total : b.total - a.total,
+      ),
+    [categories, sortAsc],
+  );
+
   if (isLoading) return <div>Loading stats...</div>;
   if (isError) {
     const message =
@@ -30,10 +47,6 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
   }
   if (!stats || stats.byCategory.length === 0)
     return <div>No data for this period</div>;
-
-  const sortedCategories = [...stats.byCategory].sort((a, b) =>
-    sortAsc ? a.total - b.total : b.total - a.total,
-  );
 
   return (
     <div>
@@ -49,7 +62,7 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
       <div className="flex flex-col lg:flex-row items-center gap-8">
         <PieChart width={280} height={280}>
           <Pie
-            data={stats.byCategory}
+            data={categories}
             dataKey="total"
             nameKey="categoryName"
             cx="50%"
@@ -57,8 +70,8 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
             outerRadius={120}
             innerRadius={60}
           >
-            {stats.byCategory.map((_item, index) => (
-              <Cell key={index} fill={getChartColor(index)} />
+            {categories.map((cat) => (
+              <Cell key={cat.categoryName} fill={cat.color} />
             ))}
           </Pie>
           <Tooltip
@@ -83,15 +96,12 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
             {sortedCategories.map((cat) => {
               const pct = clampPercentage(cat.percentage);
               const width = `${pct}%`;
-              const originalIndex = stats.byCategory.findIndex(
-                (c) => c.categoryName === cat.categoryName,
-              );
 
               return (
                 <div key={cat.categoryName} className="flex items-center gap-3">
                   <div
                     className="w-3 h-3 rounded-full shrink-0"
-                    style={{ backgroundColor: getChartColor(originalIndex) }}
+                    style={{ backgroundColor: cat.color }}
                   />
                   <div className="flex-1 flex items-center justify-between">
                     <span className="text-sm text-gray-700">

@@ -84,10 +84,23 @@ export const DashboardPage = () => {
     navigate("/login");
   };
 
-  const handlePrevious = () =>
-    setCustomMonth(shiftMonth(currentMonth, currentYear, -1));
-  const handleNext = () =>
-    setCustomMonth(shiftMonth(currentMonth, currentYear, 1));
+  const handlePrevious = () => {
+    const shifted = shiftMonth(currentMonth, currentYear, -1);
+    if (shifted.month === nowMonth && shifted.year === nowYear) {
+      setCustomMonth(null);
+    } else {
+      setCustomMonth(shifted);
+    }
+  };
+
+  const handleNext = () => {
+    const shifted = shiftMonth(currentMonth, currentYear, 1);
+    if (shifted.month === nowMonth && shifted.year === nowYear) {
+      setCustomMonth(null);
+    } else {
+      setCustomMonth(shifted);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">

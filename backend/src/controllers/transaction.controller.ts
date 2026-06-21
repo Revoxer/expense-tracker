@@ -95,19 +95,17 @@ export const stats = async (
   next: NextFunction,
 ) => {
   try {
-    const month = Number(req.query.month);
-    const year = Number(req.query.year);
-
-    if (isNaN(month) || isNaN(year)) {
-      throw new ValidationError(
-        "month and year query params are required and must be numbers",
-      );
-    }
+    const { startDate, endDate } = req.query;
     const userId = req.user!.userId;
+
+    if (!startDate || !endDate) {
+      throw new ValidationError("startDate and endDate are required");
+    }
+
     const result = await getTransactionStats(
       userId,
-      Number(month),
-      Number(year),
+      new Date(startDate as string),
+      new Date(endDate as string),
     );
     res.status(200).json(result);
   } catch (error) {

@@ -5,12 +5,61 @@ import { getChartColor, clampPercentage } from "../../utils/chartColors";
 import { useState, useMemo } from "react";
 
 interface StatsChartProps {
-  month: number;
-  year: number;
+  customMonth: { month: number; year: number } | null;
 }
 
-export const StatsChart = ({ month, year }: StatsChartProps) => {
+export const StatsChart = ({ customMonth }: StatsChartProps) => {
   const [sortAsc, setSortAsc] = useState(false);
+  const [period, setPeriod] = useState<"day" | "week" | "month" | "year">(
+    "month",
+  );
+
+  const getDateRange = () => {
+    const now = new Date();
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    if (customMonth) {
+      return {
+        startDate: new Date(customMonth.year, customMonth.month - 1, 1),
+        endDate: new Date(
+          customMonth.year,
+          customMonth.month,
+          0,
+          23,
+          59,
+          59,
+          999,
+        ),
+      };
+    }
+
+    switch (period) {
+      case "day":
+        return {
+          startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+          endDate: end,
+        };
+      case "week": {
+        const start = new Date(now);
+        start.setDate(now.getDate() - now.getDay());
+        start.setHours(0, 0, 0, 0);
+        return { startDate: start, endDate: end };
+      }
+      case "month":
+        return {
+          startDate: new Date(now.getFullYear(), now.getMonth(), 1),
+          endDate: end,
+        };
+      case "year":
+        return {
+          startDate: new Date(now.getFullYear(), 0, 1),
+          endDate: end,
+        };
+    }
+  };
+
+  const { startDate, endDate } = getDateRange();
 
   const {
     data: stats,
@@ -18,8 +67,8 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
     isError,
     error,
   } = useQuery({
-    queryKey: ["stats", month, year],
-    queryFn: () => getStats(month, year),
+    queryKey: ["stats", customMonth ?? period],
+    queryFn: () => getStats(startDate, endDate),
   });
 
   const categories = useMemo(
@@ -50,6 +99,30 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
 
   return (
     <div>
+      {!customMonth && (
+        <div className="flex gap-2 mb-6">
+          {(["day", "week", "month", "year"] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                period === p
+                  ? "bg-gray-900 text-white"
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+              }`}
+            >
+              {p === "day"
+                ? "Today"
+                : p === "week"
+                  ? "This Week"
+                  : p === "month"
+                    ? "This Month"
+                    : "This Year"}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <p className="text-sm text-gray-500">Total spent</p>

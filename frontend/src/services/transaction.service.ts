@@ -34,11 +34,14 @@ export const deleteTransaction = async (id: string): Promise<void> => {
 };
 
 export const getStats = async (
-  month: number,
-  year: number,
+  startDate: Date,
+  endDate: Date,
 ): Promise<TransactionStats> => {
   const response = await api.get("/transactions/stats", {
-    params: { month, year },
+    params: {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    },
   });
   return response.data;
 };

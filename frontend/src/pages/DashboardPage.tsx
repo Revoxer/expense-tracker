@@ -27,8 +27,18 @@ export const DashboardPage = () => {
 
   const queryClient = useQueryClient();
 
-  const currentMonth = customMonth?.month ?? now.getMonth() + 1;
-  const currentYear = customMonth?.year ?? now.getFullYear();
+  const nowMonth = now.getMonth() + 1;
+  const nowYear = now.getFullYear();
+
+  const currentMonth = customMonth?.month ?? nowMonth;
+  const currentYear = customMonth?.year ?? nowYear;
+
+  const shiftMonth = (month: number, year: number, delta: 1 | -1) => {
+    const nextMonth = month + delta;
+    if (nextMonth === 0) return { month: 12, year: year - 1 };
+    if (nextMonth === 13) return { month: 1, year: year + 1 };
+    return { month: nextMonth, year };
+  };
 
   const deleteMutation = useMutation({
     mutationFn: deleteTransaction,
@@ -74,25 +84,10 @@ export const DashboardPage = () => {
     navigate("/login");
   };
 
-  const handlePrevious = () => {
-    const m = customMonth?.month ?? now.getMonth() + 1;
-    const y = customMonth?.year ?? now.getFullYear();
-    if (m === 1) {
-      setCustomMonth({ month: 12, year: y - 1 });
-    } else {
-      setCustomMonth({ month: m - 1, year: y });
-    }
-  };
-
-  const handleNext = () => {
-    const m = customMonth?.month ?? now.getMonth() + 1;
-    const y = customMonth?.year ?? now.getFullYear();
-    if (m === 12) {
-      setCustomMonth({ month: 1, year: y + 1 });
-    } else {
-      setCustomMonth({ month: m + 1, year: y });
-    }
-  };
+  const handlePrevious = () =>
+    setCustomMonth(shiftMonth(currentMonth, currentYear, -1));
+  const handleNext = () =>
+    setCustomMonth(shiftMonth(currentMonth, currentYear, 1));
 
   return (
     <div className="min-h-screen bg-gray-50">

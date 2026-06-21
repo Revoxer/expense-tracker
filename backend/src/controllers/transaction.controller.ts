@@ -102,11 +102,21 @@ export const stats = async (
       throw new ValidationError("startDate and endDate are required");
     }
 
-    const result = await getTransactionStats(
-      userId,
-      new Date(startDate as string),
-      new Date(endDate as string),
-    );
+    const start = new Date(startDate as string);
+    const end = new Date(endDate as string);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new ValidationError("startDate and endDate must be valid dates");
+    }
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    if (start > end) {
+      throw new ValidationError("startDate must be before endDate");
+    }
+
+    const result = await getTransactionStats(userId, start, end);
     res.status(200).json(result);
   } catch (error) {
     next(error);

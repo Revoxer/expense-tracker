@@ -67,7 +67,12 @@ export const StatsChart = ({ customMonth }: StatsChartProps) => {
     isError,
     error,
   } = useQuery({
-    queryKey: ["stats", customMonth ?? period],
+    queryKey: [
+      "stats",
+      customMonth ?? period,
+      startDate.toDateString(),
+      endDate.toDateString(),
+    ],
     queryFn: () => getStats(startDate, endDate),
   });
 

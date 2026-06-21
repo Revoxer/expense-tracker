@@ -5,6 +5,10 @@ import type {
   TransactionStats,
 } from "../types/transaction.types";
 
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString("en-CA");
+};
+
 export const getTransactions = async (filters?: {
   month?: number;
   year?: number;
@@ -39,8 +43,8 @@ export const getStats = async (
 ): Promise<TransactionStats> => {
   const response = await api.get("/transactions/stats", {
     params: {
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
+      startDate: formatDate(startDate),
+      endDate: formatDate(endDate),
     },
   });
   return response.data;

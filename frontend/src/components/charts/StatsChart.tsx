@@ -3,24 +3,23 @@ import { useQuery } from "@tanstack/react-query";
 import { getStats } from "../../services/transaction.service";
 import { getChartColor, clampPercentage } from "../../utils/chartColors";
 import { useState, useMemo } from "react";
+import { getDateRangeForPeriod } from "../../utils/dateRange";
 
 interface StatsChartProps {
   customMonth: { month: number; year: number } | null;
+  period: "day" | "week" | "month" | "year";
+  onPeriodChange: (period: "day" | "week" | "month" | "year") => void;
 }
 
-export const StatsChart = ({ customMonth }: StatsChartProps) => {
+export const StatsChart = ({
+  customMonth,
+  period,
+  onPeriodChange,
+}: StatsChartProps) => {
   const [sortAsc, setSortAsc] = useState(false);
-  const [period, setPeriod] = useState<"day" | "week" | "month" | "year">(
-    "month",
-  );
 
-  const getDateRange = () => {
-    const now = new Date();
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
-
-    if (customMonth) {
-      return {
+  const { startDate, endDate } = customMonth
+    ? {
         startDate: new Date(customMonth.year, customMonth.month - 1, 1),
         endDate: new Date(
           customMonth.year,
@@ -31,35 +30,8 @@ export const StatsChart = ({ customMonth }: StatsChartProps) => {
           59,
           999,
         ),
-      };
-    }
-
-    switch (period) {
-      case "day":
-        return {
-          startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
-          endDate: end,
-        };
-      case "week": {
-        const start = new Date(now);
-        start.setDate(now.getDate() - now.getDay());
-        start.setHours(0, 0, 0, 0);
-        return { startDate: start, endDate: end };
       }
-      case "month":
-        return {
-          startDate: new Date(now.getFullYear(), now.getMonth(), 1),
-          endDate: end,
-        };
-      case "year":
-        return {
-          startDate: new Date(now.getFullYear(), 0, 1),
-          endDate: end,
-        };
-    }
-  };
-
-  const { startDate, endDate } = getDateRange();
+    : getDateRangeForPeriod(period);
 
   const {
     data: stats,
@@ -109,7 +81,7 @@ export const StatsChart = ({ customMonth }: StatsChartProps) => {
           {(["day", "week", "month", "year"] as const).map((p) => (
             <button
               key={p}
-              onClick={() => setPeriod(p)}
+              onClick={() => onPeriodChange(p)}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                 period === p
                   ? "bg-gray-900 text-white"

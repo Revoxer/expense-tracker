@@ -13,6 +13,8 @@ export const getTransactions = async (filters?: {
   month?: number;
   year?: number;
   categoryId?: string;
+  startDate?: string;
+  endDate?: string;
 }): Promise<Transaction[]> => {
   const response = await api.get("/transactions", { params: filters });
   return response.data;

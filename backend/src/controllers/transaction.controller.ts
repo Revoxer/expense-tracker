@@ -30,12 +30,32 @@ export const findAll = async (
   next: NextFunction,
 ) => {
   try {
-    const { month, year, categoryId } = req.query;
+    const { month, year, categoryId, startDate, endDate } = req.query;
     const userId = req.user!.userId;
+    const parseDateFromQuery = (
+      value: unknown,
+      isEnd = false,
+    ): Date | undefined => {
+      if (typeof value !== "string") return undefined;
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+      if (!match) return undefined;
+      const [, y, m, d] = match;
+      const date = new Date(Number(y), Number(m) - 1, Number(d));
+      if (isNaN(date.getTime())) return undefined;
+      if (isEnd) {
+        date.setHours(23, 59, 59, 999);
+      } else {
+        date.setHours(0, 0, 0, 0);
+      }
+      return date;
+    };
+
     const filters = {
       month: month ? Number(month) : undefined,
       year: year ? Number(year) : undefined,
       categoryId: typeof categoryId === "string" ? categoryId : undefined,
+      startDate: parseDateFromQuery(startDate, false),
+      endDate: parseDateFromQuery(endDate, true),
     };
     const result = await findAllTransactions(userId, filters);
     res.status(200).json(result);

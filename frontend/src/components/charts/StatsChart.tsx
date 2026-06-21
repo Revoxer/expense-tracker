@@ -1,7 +1,7 @@
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { getStats } from "../../services/transaction.service";
-import { getChartColor } from "../../utils/chartColors";
+import { getChartColor, clampPercentage } from "../../utils/chartColors";
 
 interface StatsChartProps {
   month: number;
@@ -61,8 +61,8 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
 
         <div className="flex-1 w-full space-y-3">
           {stats.byCategory.map((cat, index) => {
-            const pct = Number.isFinite(cat.percentage) ? cat.percentage : 0;
-            const width = `${Math.min(100, Math.max(0, pct))}%`;
+            const pct = clampPercentage(cat.percentage);
+            const width = `${pct}%`;
 
             return (
               <div key={cat.categoryName} className="flex items-center gap-3">
@@ -82,7 +82,7 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
                       />
                     </div>
                     <span className="text-sm font-medium text-gray-900 w-10 text-right">
-                      {cat.percentage}%
+                      {pct}%
                     </span>
                     <span className="text-sm text-gray-500 w-16 text-right">
                       ${cat.total.toFixed(2)}

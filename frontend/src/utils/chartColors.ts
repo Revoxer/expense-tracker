@@ -12,3 +12,8 @@ export const CHART_COLORS = [
 export const getChartColor = (index: number): string => {
   return CHART_COLORS[index % CHART_COLORS.length];
 };
+
+export const clampPercentage = (value: number): number => {
+  const pct = Number.isFinite(value) ? value : 0;
+  return Math.min(100, Math.max(0, pct));
+};

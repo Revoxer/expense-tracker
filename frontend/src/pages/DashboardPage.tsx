@@ -17,13 +17,28 @@ export const DashboardPage = () => {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const navigate = useNavigate();
   const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
+  const [customMonth, setCustomMonth] = useState<{
+    month: number;
+    year: number;
+  } | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
 
   const queryClient = useQueryClient();
+
+  const nowMonth = now.getMonth() + 1;
+  const nowYear = now.getFullYear();
+
+  const currentMonth = customMonth?.month ?? nowMonth;
+  const currentYear = customMonth?.year ?? nowYear;
+
+  const shiftMonth = (month: number, year: number, delta: 1 | -1) => {
+    const nextMonth = month + delta;
+    if (nextMonth === 0) return { month: 12, year: year - 1 };
+    if (nextMonth === 13) return { month: 1, year: year + 1 };
+    return { month: nextMonth, year };
+  };
 
   const deleteMutation = useMutation({
     mutationFn: deleteTransaction,
@@ -41,8 +56,8 @@ export const DashboardPage = () => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["transactions", month, year],
-    queryFn: () => getTransactions({ month, year }),
+    queryKey: ["transactions", currentMonth, currentYear],
+    queryFn: () => getTransactions({ month: currentMonth, year: currentYear }),
   });
 
   if (isLoading)
@@ -69,6 +84,11 @@ export const DashboardPage = () => {
     navigate("/login");
   };
 
+  const handlePrevious = () =>
+    setCustomMonth(shiftMonth(currentMonth, currentYear, -1));
+  const handleNext = () =>
+    setCustomMonth(shiftMonth(currentMonth, currentYear, 1));
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200">
@@ -88,43 +108,44 @@ export const DashboardPage = () => {
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
         <div className="flex items-center justify-between">
           <button
-            onClick={() => {
-              if (month === 1) {
-                setMonth(12);
-                setYear(year - 1);
-              } else {
-                setMonth(month - 1);
-              }
-            }}
+            onClick={handlePrevious}
             className="text-sm text-gray-500 hover:text-gray-900 transition-colors px-3 py-1 rounded-lg hover:bg-gray-100"
           >
             ← Previous
           </button>
-          <span className="text-sm font-medium text-gray-900">
-            {new Date(year, month - 1).toLocaleDateString("en-GB", {
-              month: "long",
-              year: "numeric",
-            })}
-          </span>
+
+          <div className="flex items-center gap-3">
+            {customMonth && (
+              <button
+                onClick={() => setCustomMonth(null)}
+                className="text-xs text-gray-400 hover:text-gray-900 transition-colors"
+              >
+                ✕ Reset
+              </button>
+            )}
+            <span className="text-sm font-medium text-gray-900">
+              {customMonth
+                ? new Date(currentYear, currentMonth - 1).toLocaleDateString(
+                    "en-GB",
+                    { month: "long", year: "numeric" },
+                  )
+                : "Current period"}
+            </span>
+          </div>
+
           <button
-            onClick={() => {
-              if (month === 12) {
-                setMonth(1);
-                setYear(year + 1);
-              } else {
-                setMonth(month + 1);
-              }
-            }}
+            onClick={handleNext}
             className="text-sm text-gray-500 hover:text-gray-900 transition-colors px-3 py-1 rounded-lg hover:bg-gray-100"
           >
             Next →
           </button>
         </div>
+
         <div className={cardClass}>
           <h2 className="text-base font-semibold text-gray-900 mb-6">
-            Monthly Overview
+            Spending Overview
           </h2>
-          <StatsChart month={month} year={year} />
+          <StatsChart customMonth={customMonth} />
         </div>
 
         <div className="flex justify-start">

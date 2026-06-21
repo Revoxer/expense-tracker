@@ -95,20 +95,28 @@ export const stats = async (
   next: NextFunction,
 ) => {
   try {
-    const month = Number(req.query.month);
-    const year = Number(req.query.year);
-
-    if (isNaN(month) || isNaN(year)) {
-      throw new ValidationError(
-        "month and year query params are required and must be numbers",
-      );
-    }
+    const { startDate, endDate } = req.query;
     const userId = req.user!.userId;
-    const result = await getTransactionStats(
-      userId,
-      Number(month),
-      Number(year),
-    );
+
+    if (!startDate || !endDate) {
+      throw new ValidationError("startDate and endDate are required");
+    }
+
+    const start = new Date(startDate as string);
+    const end = new Date(endDate as string);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new ValidationError("startDate and endDate must be valid dates");
+    }
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    if (start > end) {
+      throw new ValidationError("startDate must be before endDate");
+    }
+
+    const result = await getTransactionStats(userId, start, end);
     res.status(200).json(result);
   } catch (error) {
     next(error);

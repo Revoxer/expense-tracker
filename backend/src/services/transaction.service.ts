@@ -54,11 +54,19 @@ export const createTransaction = async (
 
 export const findAllTransactions = async (
   userId: string,
-  filters: { month?: number; year?: number; categoryId?: string },
+  filters: {
+    month?: number;
+    year?: number;
+    categoryId?: string;
+    startDate?: Date;
+    endDate?: Date;
+  },
 ): Promise<TransactionResponse[]> => {
   const where: Prisma.TransactionWhereInput = { userId };
 
-  if (filters.month && filters.year) {
+  if (filters.startDate && filters.endDate) {
+    where.date = { gte: filters.startDate, lte: filters.endDate };
+  } else if (filters.month && filters.year) {
     const startDate = new Date(filters.year, filters.month - 1, 1);
     const endDate = new Date(filters.year, filters.month, 0);
     where.date = { gte: startDate, lte: endDate };
@@ -141,10 +149,13 @@ export const deleteTransaction = async (
 
 export const getTransactionStats = async (
   userId: string,
-  month: number,
-  year: number,
+  startDate: Date,
+  endDate: Date,
 ): Promise<TransactionStats> => {
-  const transactions = await findAllTransactions(userId, { month, year });
+  const transactions = await findAllTransactions(userId, {
+    startDate,
+    endDate,
+  });
 
   const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
 

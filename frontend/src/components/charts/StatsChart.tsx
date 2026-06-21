@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getStats } from "../../services/transaction.service";
 import { getChartColor, clampPercentage } from "../../utils/chartColors";
 import { useState, useMemo } from "react";
+import { getDateRangeForPeriod } from "../../utils/dateRange";
 
 interface StatsChartProps {
   customMonth: { month: number; year: number } | null;
@@ -17,13 +18,8 @@ export const StatsChart = ({
 }: StatsChartProps) => {
   const [sortAsc, setSortAsc] = useState(false);
 
-  const getDateRange = () => {
-    const now = new Date();
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
-
-    if (customMonth) {
-      return {
+  const { startDate, endDate } = customMonth
+    ? {
         startDate: new Date(customMonth.year, customMonth.month - 1, 1),
         endDate: new Date(
           customMonth.year,
@@ -34,36 +30,8 @@ export const StatsChart = ({
           59,
           999,
         ),
-      };
-    }
-
-    switch (period) {
-      case "day":
-        return {
-          startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
-          endDate: end,
-        };
-      case "week": {
-        const start = new Date(now);
-        const day = now.getDay();
-        start.setDate(now.getDate() - day);
-        start.setHours(0, 0, 0, 0);
-        return { startDate: start, endDate: end };
       }
-      case "month":
-        return {
-          startDate: new Date(now.getFullYear(), now.getMonth(), 1),
-          endDate: end,
-        };
-      case "year":
-        return {
-          startDate: new Date(now.getFullYear(), 0, 1),
-          endDate: end,
-        };
-    }
-  };
-
-  const { startDate, endDate } = getDateRange();
+    : getDateRangeForPeriod(period);
 
   const {
     data: stats,

@@ -13,41 +13,10 @@ import { Modal } from "../components/ui/Modal";
 import { EditTransactionForm } from "../components/forms/EditTransactionForm";
 import { getCategories } from "../services/category.service";
 import type { Transaction } from "../types/transaction.types";
+import { getDateRangeForPeriod, type Period } from "../utils/dateRange";
 
-type Period = "day" | "week" | "month" | "year";
 type SortField = "date" | "amount";
 type SortOrder = "asc" | "desc";
-
-const getDateRangeForPeriod = (period: Period) => {
-  const now = new Date();
-  const end = new Date();
-  end.setHours(23, 59, 59, 999);
-
-  switch (period) {
-    case "day":
-      return {
-        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
-        endDate: end,
-      };
-    case "week": {
-      const start = new Date(now);
-      const day = now.getDay();
-      start.setDate(now.getDate() - day);
-      start.setHours(0, 0, 0, 0);
-      return { startDate: start, endDate: end };
-    }
-    case "month":
-      return {
-        startDate: new Date(now.getFullYear(), now.getMonth(), 1),
-        endDate: end,
-      };
-    case "year":
-      return {
-        startDate: new Date(now.getFullYear(), 0, 1),
-        endDate: end,
-      };
-  }
-};
 
 export const DashboardPage = () => {
   const clearAuth = useAuthStore((state) => state.clearAuth);
@@ -109,26 +78,27 @@ export const DashboardPage = () => {
   });
 
   const { startDate, endDate } = customMonth
-    ? {
-        startDate: undefined,
-        endDate: undefined,
-      }
+    ? { startDate: undefined, endDate: undefined }
     : getDateRangeForPeriod(period);
+
+  const startDateString = startDate?.toLocaleDateString("en-CA");
+  const endDateString = endDate?.toLocaleDateString("en-CA");
 
   const {
     data: transactions,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["transactions", customMonth ?? period],
+    queryKey: [
+      "transactions",
+      customMonth ?? period,
+      { startDate: startDateString, endDate: endDateString },
+    ],
     queryFn: () =>
       getTransactions(
         customMonth
           ? { month: customMonth.month, year: customMonth.year }
-          : {
-              startDate: startDate?.toLocaleDateString("en-CA"),
-              endDate: endDate?.toLocaleDateString("en-CA"),
-            },
+          : { startDate: startDateString, endDate: endDateString },
       ),
   });
 

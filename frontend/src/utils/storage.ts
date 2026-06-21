@@ -9,6 +9,7 @@ export const getToken = (): string | null => {
 
 export const setToken = (token: string): void => {
   try {
+    if (typeof window === "undefined") return;
     localStorage.setItem("token", token);
   } catch {
     console.error("Failed to save token to localStorage");
@@ -17,6 +18,7 @@ export const setToken = (token: string): void => {
 
 export const removeToken = (): void => {
   try {
+    if (typeof window === "undefined") return;
     localStorage.removeItem("token");
   } catch {
     console.error("Failed to remove token from localStorage");

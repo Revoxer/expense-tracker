@@ -82,7 +82,7 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
                       />
                     </div>
                     <span className="text-sm font-medium text-gray-900 w-10 text-right">
-                      {cat.percentage}%
+                      {pct}%
                     </span>
                     <span className="text-sm text-gray-500 w-16 text-right">
                       ${cat.total.toFixed(2)}

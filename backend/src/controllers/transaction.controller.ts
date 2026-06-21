@@ -30,12 +30,14 @@ export const findAll = async (
   next: NextFunction,
 ) => {
   try {
-    const { month, year, categoryId } = req.query;
+    const { month, year, categoryId, startDate, endDate } = req.query;
     const userId = req.user!.userId;
     const filters = {
       month: month ? Number(month) : undefined,
       year: year ? Number(year) : undefined,
       categoryId: typeof categoryId === "string" ? categoryId : undefined,
+      startDate: startDate ? new Date(startDate as string) : undefined,
+      endDate: endDate ? new Date(endDate as string) : undefined,
     };
     const result = await findAllTransactions(userId, filters);
     res.status(200).json(result);

@@ -6,13 +6,16 @@ import { useState, useMemo } from "react";
 
 interface StatsChartProps {
   customMonth: { month: number; year: number } | null;
+  period: "day" | "week" | "month" | "year";
+  onPeriodChange: (period: "day" | "week" | "month" | "year") => void;
 }
 
-export const StatsChart = ({ customMonth }: StatsChartProps) => {
+export const StatsChart = ({
+  customMonth,
+  period,
+  onPeriodChange,
+}: StatsChartProps) => {
   const [sortAsc, setSortAsc] = useState(false);
-  const [period, setPeriod] = useState<"day" | "week" | "month" | "year">(
-    "month",
-  );
 
   const getDateRange = () => {
     const now = new Date();
@@ -42,7 +45,8 @@ export const StatsChart = ({ customMonth }: StatsChartProps) => {
         };
       case "week": {
         const start = new Date(now);
-        start.setDate(now.getDate() - now.getDay());
+        const day = now.getDay();
+        start.setDate(now.getDate() - day);
         start.setHours(0, 0, 0, 0);
         return { startDate: start, endDate: end };
       }
@@ -109,7 +113,7 @@ export const StatsChart = ({ customMonth }: StatsChartProps) => {
           {(["day", "week", "month", "year"] as const).map((p) => (
             <button
               key={p}
-              onClick={() => setPeriod(p)}
+              onClick={() => onPeriodChange(p)}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                 period === p
                   ? "bg-gray-900 text-white"

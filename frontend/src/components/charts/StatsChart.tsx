@@ -60,35 +60,38 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
         </PieChart>
 
         <div className="flex-1 w-full space-y-3">
-          {stats.byCategory.map((cat, index) => (
-            <div key={cat.categoryName} className="flex items-center gap-3">
-              <div
-                className="w-3 h-3 rounded-full shrink-0"
-                style={{ backgroundColor: getChartColor(index) }}
-              />
-              <div className="flex-1 flex items-center justify-between">
-                <span className="text-sm text-gray-700">
-                  {cat.categoryName}
-                </span>
-                <div className="flex items-center gap-3">
-                  <div className="w-24 bg-gray-100 rounded-full h-1.5">
-                    <div
-                      className="bg-gray-900 h-1.5 rounded-full"
-                      style={{
-                        width: `${Math.min(100, Math.max(0, cat.percentage))}%`,
-                      }}
-                    />
+          {stats.byCategory.map((cat, index) => {
+            const pct = Number.isFinite(cat.percentage) ? cat.percentage : 0;
+            const width = `${Math.min(100, Math.max(0, pct))}%`;
+
+            return (
+              <div key={cat.categoryName} className="flex items-center gap-3">
+                <div
+                  className="w-3 h-3 rounded-full shrink-0"
+                  style={{ backgroundColor: getChartColor(index) }}
+                />
+                <div className="flex-1 flex items-center justify-between">
+                  <span className="text-sm text-gray-700">
+                    {cat.categoryName}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-24 bg-gray-100 rounded-full h-1.5">
+                      <div
+                        className="bg-gray-900 h-1.5 rounded-full"
+                        style={{ width }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900 w-10 text-right">
+                      {cat.percentage}%
+                    </span>
+                    <span className="text-sm text-gray-500 w-16 text-right">
+                      ${cat.total.toFixed(2)}
+                    </span>
                   </div>
-                  <span className="text-sm font-medium text-gray-900 w-10 text-right">
-                    {cat.percentage}%
-                  </span>
-                  <span className="text-sm text-gray-500 w-16 text-right">
-                    ${cat.total.toFixed(2)}
-                  </span>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

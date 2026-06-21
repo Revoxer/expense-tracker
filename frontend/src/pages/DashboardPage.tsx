@@ -9,6 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { AddTransactionForm } from "../components/forms/AddTransactionForm";
 import { StatsChart } from "../components/charts/StatsChart";
 import { cardClass } from "../utils/styles";
+import { Modal } from "../components/ui/Modal";
+import { EditTransactionForm } from "../components/forms/EditTransactionForm";
+import type { Transaction } from "../types/transaction.types";
 
 export const DashboardPage = () => {
   const clearAuth = useAuthStore((state) => state.clearAuth);
@@ -16,6 +19,9 @@ export const DashboardPage = () => {
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -121,12 +127,35 @@ export const DashboardPage = () => {
           <StatsChart month={month} year={year} />
         </div>
 
-        <div className={cardClass}>
-          <h2 className="text-base font-semibold text-gray-900 mb-6">
-            Add Transaction
-          </h2>
-          <AddTransactionForm />
+        <div className="flex justify-start">
+          <button
+            onClick={() => setIsAddOpen(true)}
+            className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+          >
+            + Add Transaction
+          </button>
         </div>
+
+        <Modal
+          isOpen={isAddOpen}
+          onClose={() => setIsAddOpen(false)}
+          title="Add Transaction"
+        >
+          <AddTransactionForm onSuccess={() => setIsAddOpen(false)} />
+        </Modal>
+
+        <Modal
+          isOpen={!!editingTransaction}
+          onClose={() => setEditingTransaction(null)}
+          title="Edit Transaction"
+        >
+          {editingTransaction && (
+            <EditTransactionForm
+              transaction={editingTransaction}
+              onSuccess={() => setEditingTransaction(null)}
+            />
+          )}
+        </Modal>
 
         <div className={cardClass}>
           <h2 className="text-base font-semibold text-gray-900 mb-6">
@@ -159,6 +188,12 @@ export const DashboardPage = () => {
                   <span className="text-sm font-semibold text-gray-900">
                     ${transaction.amount.toFixed(2)}
                   </span>
+                  <button
+                    onClick={() => setEditingTransaction(transaction)}
+                    className="text-xs text-gray-400 hover:text-gray-900 transition-colors"
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => deleteMutation.mutate(transaction.id)}
                     disabled={deleteMutation.isPending}

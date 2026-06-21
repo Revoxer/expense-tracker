@@ -74,7 +74,9 @@ export const StatsChart = ({ month, year }: StatsChartProps) => {
                   <div className="w-24 bg-gray-100 rounded-full h-1.5">
                     <div
                       className="bg-gray-900 h-1.5 rounded-full"
-                      style={{ width: `${cat.percentage}%` }}
+                      style={{
+                        width: `${Math.min(100, Math.max(0, cat.percentage))}%`,
+                      }}
                     />
                   </div>
                   <span className="text-sm font-medium text-gray-900 w-10 text-right">

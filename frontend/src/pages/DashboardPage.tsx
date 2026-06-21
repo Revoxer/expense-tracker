@@ -22,8 +22,11 @@ export const DashboardPage = () => {
   const deleteMutation = useMutation({
     mutationFn: deleteTransaction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["stats"] });
+      queryClient.invalidateQueries({
+        queryKey: ["transactions"],
+        exact: false,
+      });
+      queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
     },
   });
 
